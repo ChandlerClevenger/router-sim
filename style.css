@@ -1,0 +1,49 @@
+:root {
+  --devices-width: 20vw;
+  --canvas-width: calc(100vw - var(--devices-width));
+}
+
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  background-color: blanchedalmond;
+}
+
+#devices {
+  background-color: rgba(0, 0, 0, 0.281);
+  height: 100%;
+  width: 20vw;
+}
+
+#canvas {
+  position: absolute;
+  left: var(--devices-width);
+  height: 100%;
+  width: var(--canvas-width);
+  top: 0px;
+}
+
+#router {
+  width: var(--devices-width);
+}
+
+.router {
+  width: var(--devices-width);
+  height: auto;
+}
+
+.placed-router {
+  width: var(--devices-width);
+  height: auto;
+  position: absolute;
+  width: 10vw;
+  height: auto;
+  top: 321px;
+  left: 195px;
+}
