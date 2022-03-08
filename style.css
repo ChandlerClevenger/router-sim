@@ -34,16 +34,22 @@ body {
 }
 
 .router {
-  width: var(--devices-width);
+  width: calc(var(--devices-width) / 2);
   height: auto;
 }
 
-.placed-router {
-  width: var(--devices-width);
-  height: auto;
+#lines {
   position: absolute;
-  width: 10vw;
-  height: auto;
-  top: 321px;
-  left: 195px;
+  top: 0px;
+  left: 0px;
+  height: 100%;
+  width: 100%;
+  pointer-events: none;
+}
+
+#caution {
+  position: absolute;
+  bottom: 0px;
+  text-align: center;
+  width: 100%;
 }
