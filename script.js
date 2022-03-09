@@ -1,61 +1,77 @@
+import Dijkstra from "./Dijkstra.js";
 let canvas = document.getElementById("canvas");
 let router = document.getElementById("router");
 let routerCount = 0;
+let routers = [];
+let connections = [];
 router.addEventListener("click", onDeviceClick);
 
 function onDeviceClick() {
-  canvas.addEventListener("click", onCanvasUp);
+  canvas.addEventListener("click", onDevicePlace);
 }
 
-function onCanvasUp(event) {
+function onDevicePlace(event) {
   let x = event.clientX;
   let y = event.clientY;
-  let image = document.createElement("img");
-  image.src = "./images/router.png";
-  image.id = routerCount;
-  image.classList.add("router");
-  image.style =
+  let routerWrapper = document.createElement("div");
+  let router = document.createElement("img");
+  router.addEventListener("click", routerClicked);
+  router.src = "./images/router.png";
+  router.id = "router" + routerCount;
+  router.classList.add("router");
+  routerWrapper.style =
     "height:auto; position:absolute; top:" +
     y +
     "px; left:" +
     (x - canvas.getBoundingClientRect().x) +
     "px;";
-  image.addEventListener("click", routerClicked);
-  canvas.appendChild(image);
-  canvas.removeEventListener("click", onCanvasUp);
+  routerWrapper.classList.add("router-wrapper");
+  routerWrapper.id += router.id;
+  routerWrapper.setAttribute("data-content", router.id);
+  routerWrapper.appendChild(router);
+  let idElement = document.createElement("p");
+  idElement.textContent = router.id;
+  routerWrapper.appendChild(idElement);
 
+  let weightElement = document.createElement("p");
+  weightElement.classList.add(router.id);
+  routerWrapper.appendChild(weightElement);
+  canvas.appendChild(routerWrapper);
+
+  routerWrapper.style.transform = `translate(-${router.width / 2}px, -${
+    router.height / 2
+  }px)`;
+  canvas.removeEventListener("click", onDevicePlace);
+  routers.push(router.id.toString());
+  updateDisplay();
   routerCount += 1;
 }
 
-// change from event based constraint to a stack of elements
-// then there can be a dict of edges made between routers
-
-let routerStack = [];
+let clickedRouters = [];
 function routerClicked(event) {
-  routerStack.push(event.target);
+  clickedRouters.push(event.target);
 
-  if (routerStack.length % 2 == 1) {
-    console.log("added");
-  } else {
-    console.log("removed");
-    let firstRouter = routerStack.shift();
-    console.log(firstRouter);
-    console.log(
-      `FirstX = ${firstRouter.x} | FirstY = ${firstRouter.y}\n SecondX = ${event.clientX} | SecondY = ${event.clientY}`
-    );
-    linedraw(firstRouter, event.target);
-    routerStack = [];
+  // I wanna add a visual to show all actions in a feed
+  if (clickedRouters.length % 2 == 0) {
+    let weight = prompt("What weight should this line hold?");
+    if (weight == null) {
+      clickedRouters = [];
+      return;
+    }
+    linedraw(clickedRouters.shift(), event.target, parseInt(weight));
+    clickedRouters = [];
   }
 }
 
-// borrowed code below. augmented for this use case. very nice!
-function linedraw(el1, el2) {
-  let x1 = el1.x + el1.width / 2;
-  let y1 = el1.y + el1.height / 2;
-  let x2 = el2.x + el2.width / 2;
-  let y2 = el2.y + el2.height / 2;
+// mostly borrowed code below. augmented for this use case. very nice!
+let lineCounter = 0;
+function linedraw(el1, el2, weight) {
+  let x1 = el1.x;
+  let y1 = el1.y;
+  let x2 = el2.x;
+  let y2 = el2.y;
   if (x2 < x1) {
-    var tmp;
+    let tmp;
     tmp = x2;
     x2 = x1;
     x1 = tmp;
@@ -64,13 +80,19 @@ function linedraw(el1, el2) {
     y1 = tmp;
   }
 
-  var lineLength = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-  var m = (y2 - y1) / (x2 - x1);
+  let lineLength = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+  let m = (y2 - y1) / (x2 - x1);
 
-  var degree = (Math.atan(m) * 180) / Math.PI;
+  let degree = (Math.atan(m) * 180) / Math.PI;
 
   document.getElementById("lines").innerHTML +=
-    "<div class='line' style='transform-origin: top left; transform: rotate(" +
+    "<div class='line' id='line" +
+    lineCounter +
+    "'" +
+    " data-weight='" +
+    weight +
+    "'" +
+    "style='transform-origin: top left; transform: rotate(" +
     degree +
     "deg); width: " +
     lineLength +
@@ -79,4 +101,23 @@ function linedraw(el1, el2) {
     "px; left: " +
     x1 +
     "px;'></div>";
+
+  // add info for doing Dijkstra
+  connections.push({
+    firstNode: el1.id,
+    secondNode: el2.id,
+    weight: parseInt(weight),
+  });
+  updateDisplay();
+  lineCounter += 1;
+}
+
+function updateDisplay() {
+  let dijkstra = new Dijkstra(connections, routers, routers[0]);
+  let finalConnections = dijkstra.performDijkstra();
+  for (let result in finalConnections) {
+    let routerElement = document.querySelector("." + result);
+    routerElement.textContent = finalConnections[result].weight;
+  }
+  console.log(finalConnections);
 }

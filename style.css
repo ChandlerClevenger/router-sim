@@ -1,6 +1,7 @@
 :root {
-  --devices-width: 20vw;
+  --devices-width: min(20vw, 200px);
   --canvas-width: calc(100vw - var(--devices-width));
+  --main-background-color: blanchedalmond;
 }
 
 body,
@@ -12,13 +13,14 @@ html {
 }
 
 body {
-  background-color: blanchedalmond;
+  background-color: var(--main-background-color);
+  overflow: hidden;
 }
 
 #devices {
   background-color: rgba(0, 0, 0, 0.281);
   height: 100%;
-  width: 20vw;
+  width: var(--devices-width);
 }
 
 #canvas {
@@ -52,4 +54,27 @@ body {
   bottom: 0px;
   text-align: center;
   width: 100%;
+}
+
+.line {
+  text-align: center;
+  z-index: -1;
+}
+
+.line::after {
+  content: attr(data-weight);
+}
+
+.router-wrapper {
+  text-align: center;
+  position: relative;
+  background-color: burlywood;
+}
+
+.router-wrapper > img {
+  background-color: var(--main-background-color);
+}
+
+p {
+  line-height: 0px;
 }
