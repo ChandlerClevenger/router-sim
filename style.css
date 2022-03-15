@@ -51,9 +51,12 @@ body {
 
 #caution {
   position: absolute;
+  background-color: black;
   bottom: 0px;
   text-align: center;
-  width: 100%;
+  color: red;
+  font-size: 20px;
+  width: 500px;
 }
 
 .line {
@@ -67,8 +70,9 @@ body {
 
 .router-wrapper {
   text-align: center;
-  position: relative;
   background-color: burlywood;
+  height: auto;
+  position: absolute;
 }
 
 .router-wrapper > img {

@@ -19,12 +19,6 @@ function onDevicePlace(event) {
   router.src = "./images/router.png";
   router.id = "router" + routerCount;
   router.classList.add("router");
-  routerWrapper.style =
-    "height:auto; position:absolute; top:" +
-    y +
-    "px; left:" +
-    (x - canvas.getBoundingClientRect().x) +
-    "px;";
   routerWrapper.classList.add("router-wrapper");
   routerWrapper.id += router.id;
   routerWrapper.setAttribute("data-content", router.id);
@@ -37,10 +31,10 @@ function onDevicePlace(event) {
   weightElement.classList.add(router.id);
   routerWrapper.appendChild(weightElement);
   canvas.appendChild(routerWrapper);
-
-  routerWrapper.style.transform = `translate(-${router.width / 2}px, -${
-    router.height / 2
-  }px)`;
+  y = y - router.height / 2 + "px";
+  x = x - canvas.getBoundingClientRect().x - router.width / 2 + "px";
+  routerWrapper.style.top = y;
+  routerWrapper.style.left = x;
   canvas.removeEventListener("click", onDevicePlace);
   routers.push(router.id.toString());
   updateDisplay();
@@ -58,7 +52,17 @@ function routerClicked(event) {
       clickedRouters = [];
       return;
     }
-    linedraw(clickedRouters.shift(), event.target, parseInt(weight));
+    let el1 = clickedRouters.shift();
+    let el2 = event.target;
+
+    linedraw(el1, el2, parseInt(weight));
+    // add info for doing Dijkstra
+    connections.push({
+      firstNode: el1.id,
+      secondNode: el2.id,
+      weight: parseInt(weight),
+    });
+    updateDisplay();
     clickedRouters = [];
   }
 }
@@ -66,10 +70,12 @@ function routerClicked(event) {
 // mostly borrowed code below. augmented for this use case. very nice!
 let lineCounter = 0;
 function linedraw(el1, el2, weight) {
-  let x1 = el1.x;
-  let y1 = el1.y;
-  let x2 = el2.x;
-  let y2 = el2.y;
+  el1 = el1.getBoundingClientRect();
+  el2 = el2.getBoundingClientRect();
+  let x1 = el1.x + el1.width / 2;
+  let y1 = el1.y + el1.height / 2;
+  let x2 = el2.x + el2.width / 2;
+  let y2 = el2.y + el2.height / 2;
   if (x2 < x1) {
     let tmp;
     tmp = x2;
@@ -102,13 +108,6 @@ function linedraw(el1, el2, weight) {
     x1 +
     "px;'></div>";
 
-  // add info for doing Dijkstra
-  connections.push({
-    firstNode: el1.id,
-    secondNode: el2.id,
-    weight: parseInt(weight),
-  });
-  updateDisplay();
   lineCounter += 1;
 }
 
@@ -121,3 +120,13 @@ function updateDisplay() {
   }
   console.log(finalConnections);
 }
+
+window.addEventListener("resize", function () {
+  lineCounter = 0;
+  document.getElementById("lines").innerHTML = "";
+  for (let conn of connections) {
+    let el1 = document.getElementById(conn.firstNode);
+    let el2 = document.getElementById(conn.secondNode);
+    linedraw(el1, el2, parseInt(conn.weight));
+  }
+});
